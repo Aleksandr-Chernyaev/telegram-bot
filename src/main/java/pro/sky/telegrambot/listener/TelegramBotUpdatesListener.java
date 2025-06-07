@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import pro.sky.telegrambot.service.ReminderService;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -19,6 +20,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Autowired
     private TelegramBot telegramBot;
+
+    @Autowired
+    private ReminderService reminderService;
 
     @PostConstruct
     public void init() {
@@ -38,6 +42,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     String welcomeMessage = "Добро пожаловать в бота Bel. Чем могу помочь?";
                     SendMessage message = new SendMessage(chatId, welcomeMessage);
                     telegramBot.execute(message);
+                } else {
+                    try {
+                        reminderService.parseAndSaveReminder(chatId, messageText);
+                        String confirmation = "Напоминание сохранено!";
+                        telegramBot.execute(new SendMessage(chatId, confirmation));
+                    } catch (IllegalArgumentException e) {
+                    }
                 }
             }
         }
